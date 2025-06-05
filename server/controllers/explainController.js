@@ -1,27 +1,36 @@
-const { Configuration, OpenAIApi } = require("openai");
+import OpenAI from "openai";
+import dotenv from "dotenv";
+dotenv.config();
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const openai = new OpenAIApi(configuration);
-
-const explainText = async (req, res) => {
-  const { inputText, tone } = req.body;
-
+export const explainText = async (req, res) => {
   try {
-    const prompt = `Explain this ${tone || "like I’m five"}: ${inputText}`;
+    const { inputText, tone } = req.body;
 
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4",
-      messages: [{ role: "user", content: prompt }],
+    if (!inputText || !tone) {
+      return res.status(400).json({ error: "Missing input text or tone." });
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "user",
+          content: `Explain "${inputText}" in a tone: ${tone}`,
+        },
+      ],
     });
 
-    res.json({ result: completion.data.choices[0].message.content.trim() });
+    const explanation = completion.choices[0].message.content;
+    res.status(200).json({ explanation });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Something went wrong!" });
+    console.error("Error generating explanation:", error.message);
+    res.status(500).json({
+      error: "Failed to generate explanation.",
+      message: error.message,
+    });
   }
 };
-
-module.exports = { explainText };

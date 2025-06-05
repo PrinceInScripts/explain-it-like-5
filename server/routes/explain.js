@@ -1,7 +1,9 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { explainText } = require("../controllers/explainController");
+
+import { explainText } from "../controllers/explainController.js"; // ✅ use import, and add .js
 
 router.post("/", explainText);
 
-module.exports = router;
+// Export the router to be used in the main server file
+export default router;
