@@ -14,12 +14,22 @@ export const explainText = async (req, res) => {
       return res.status(400).json({ error: "Missing input text or tone." });
     }
 
+    const tonePrompts = {
+    like5: "Explain this like I’m 5: ",
+    simple: "Explain this simply: ",
+    analogy: "Explain this using an analogy: ",
+    professional: "Explain this in a professional tone: ",
+    funny: "Explain this in a funny and light-hearted way: ",
+    motivational: "Explain this with a motivational and inspiring tone: ",
+    };
+
+
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "user",
-          content: `Explain "${inputText}" in a tone: ${tone}`,
+          content: `${tonePrompts[tone]}${inputText}`,
         },
       ],
     });
